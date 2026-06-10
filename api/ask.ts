@@ -1,15 +1,13 @@
 // Vercel serverless function: /api/ask
 //
-// Holds the Gemini API key server-side (never exposed to the browser) and
-// answers visitor questions about Rahul using the portfolio context below.
+// Holds the Gemini API key server-side (never exposed to the browser).
+// Answers visitor questions about Rahul using the portfolio context below.
 //
-// Setup:
-//   1. In Vercel project settings, add env var GEMINI_API_KEY.
-//   2. For local testing run `vercel dev` (plain `vite` won't serve /api).
-//
-// NOTE: keep PORTFOLIO_CONTEXT in sync when you update src/data/*.
+// Setup: add GEMINI_API_KEY in Vercel → Project Settings → Environment Variables.
 
-const MODEL = "gemini-2.0-flash";
+import type { VercelRequest, VercelResponse } from "@vercel/node";
+
+const MODEL = "gemini-2.0-flash-lite"; // higher free-tier limits than 2.0-flash
 
 const PORTFOLIO_CONTEXT = `
 PERSON: Rahul Kumar — Software Engineer | AI Systems. Based in Bengaluru, India.
@@ -36,8 +34,7 @@ EDUCATION:
 - Kendriya Vidyalaya Hiranagar — schooling (10th: 86.4%, 12th: 86.2%).
 
 SKILLS:
-- AI / GenAI: Multi-Agent Systems, Agent Orchestration, MCP, RAG, Prompt
-  Engineering, Vespa.
+- AI / GenAI: Multi-Agent Systems, Agent Orchestration, MCP, RAG, Prompt Engineering, Vespa.
 - Languages: C/C++, JavaScript, Python.
 - Libraries/Frameworks: React.js, Node.js, Express.js, Tailwind CSS, TypeScript,
   Prisma, Mongoose, Next.js, Redis, Fastify, Kafka.
@@ -48,7 +45,7 @@ PROJECTS:
 - EduGlow (MERN): ed-tech platform to create, consume, and rate courses; instructors
   can sell courses and track sales. Live: https://edu-glow.vercel.app/
 - QuikShare (Next.js, ShadCN, MongoDB, Redis): link & code sharing with Redis
-  caching, API rate limiting, and CI/CD via Cloud Build/Cloud Run.
+  caching, API rate limiting, CI/CD via Cloud Build/Cloud Run.
   Live: https://share.taskynow.in/
 - VaultX (React.js, Tailwind, Solana, Web3, BIP39): blockchain web wallet creating
   Solana/Ethereum wallets from a mnemonic. Live: https://vault-x-brown.vercel.app/
@@ -73,37 +70,27 @@ Answer the visitor's question in 2-4 short, friendly sentences using ONLY the co
 After answering, if a terminal command would show fuller details, suggest it in backticks, e.g. "Run \`work\` for the full experience."
 Available commands: ${COMMANDS}.
 If the question is unrelated to Rahul or this portfolio, politely say you can only answer about Rahul and suggest \`help\`.
-Keep the tone concise and terminal-appropriate. Do not use markdown headings.
+Keep the tone concise and terminal-appropriate. Do not use markdown headings or bullet points.
 
 CONTEXT:${PORTFOLIO_CONTEXT}`;
 
-interface RequestLike {
-  method?: string;
-  body?: { question?: unknown };
-}
-
-interface ResponseLike {
-  status: (code: number) => ResponseLike;
-  json: (data: unknown) => void;
-}
-
-export default async function handler(req: RequestLike, res: ResponseLike) {
+export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== "POST") {
-    res.status(405).json({ error: "Method not allowed" });
-    return;
+    return res.status(405).json({ error: "Method not allowed" });
   }
 
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
-    res.status(500).json({ error: "Server is missing GEMINI_API_KEY." });
-    return;
+    console.error("GEMINI_API_KEY is not set");
+    return res.status(500).json({ error: "Server configuration error." });
   }
 
   const question = String(req.body?.question ?? "").trim().slice(0, 500);
   if (!question) {
-    res.status(400).json({ error: "Missing question." });
-    return;
+    return res.status(400).json({ error: "Missing question." });
   }
+
+  console.log(`ask: "${question.slice(0, 80)}..."`);
 
   try {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${apiKey}`;
@@ -117,9 +104,17 @@ export default async function handler(req: RequestLike, res: ResponseLike) {
       }),
     });
 
+    if (geminiRes.status === 429) {
+      console.warn("Gemini rate limit hit");
+      return res.status(429).json({
+        error: "The AI agent is busy right now — please try again in a few seconds.",
+      });
+    }
+
     if (!geminiRes.ok) {
-      res.status(502).json({ error: "The AI service is unavailable right now." });
-      return;
+      const body = await geminiRes.text();
+      console.error(`Gemini error ${geminiRes.status}: ${body.slice(0, 200)}`);
+      return res.status(502).json({ error: "The AI service returned an error. Try again shortly." });
     }
 
     const data = await geminiRes.json();
@@ -129,8 +124,9 @@ export default async function handler(req: RequestLike, res: ResponseLike) {
         .join("")
         .trim() || "Sorry, I couldn't generate a response. Try `help` for commands.";
 
-    res.status(200).json({ answer });
-  } catch {
-    res.status(500).json({ error: "Something went wrong reaching the AI service." });
+    return res.status(200).json({ answer });
+  } catch (err) {
+    console.error("ask handler error:", err);
+    return res.status(500).json({ error: "Something went wrong. Try again shortly." });
   }
 }

@@ -24,6 +24,9 @@ export const AskAgent: React.FC<AskAgentProps> = ({ question }) => {
           signal: controller.signal,
         });
         const data = await res.json().catch(() => ({}));
+        if (res.status === 429) {
+          throw new Error(data?.error || "The AI agent is busy — please try again in a few seconds.");
+        }
         if (!res.ok) {
           throw new Error(data?.error || `Request failed (${res.status})`);
         }
