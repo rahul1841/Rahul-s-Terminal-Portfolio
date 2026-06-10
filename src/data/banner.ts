@@ -1,14 +1,12 @@
-// ASCII-art welcome banner. Single source used by both the initial render
-// and the `init` command.
+// Agentic welcome banner text, typed out with a typewriter effect by
+// components/Banner.tsx. Single source used by the initial render and `init`.
 
-export const BANNER = `
-██████   █████  ██   ██ ██    ██  ██           ██    ██ ██    ██ ██       ██  █████  ██████
-██   ██ ██   ██ ██   ██ ██    ██  ██           ██  ██   ██    ██ ██ ██ ██ ██ ██   ██ ██   ██
-██████  ███████ ███████ ██    ██  ██           ████     ██    ██ ██   █   ██ ███████ ██████
-██   ██ ██   ██ ██   ██ ██    ██  ██           ██  ██   ██    ██ ██       ██ ██   ██ ██   ██
-██   ██ ██   ██ ██   ██   ████    ███████      ██    ██   ████   ██       ██ ██   ██ ██    ██
+export const BANNER = `> initializing rahul.agent ...
+> loading profile · projects · experience ... done
+> agent online ✦
 
-Welcome to my interactive terminal portfolio.
+  Hi, I'm Rahul Kumar — I build AI agents & full-stack systems.
 
-For a list of commands type "help" and press enter.
+  ✦ Ask my AI agent anything:   ask <your question>
+  ✦ Or list all commands:       help
 `;
