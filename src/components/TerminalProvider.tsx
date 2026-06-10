@@ -1,154 +1,5 @@
-// // import React, { createContext, useContext, useState, type ReactNode } from 'react';
-// // import { HistoryItem } from '../types';
-
-// // interface TerminalContextType {
-// //   history: HistoryItem[];
-// //   commandHistory: string[];
-// //   historyIndex: number;
-// //   addToHistory: (item: HistoryItem) => void;
-// //   clearHistory: () => void;
-// //   getPreviousCommand: () => string;
-// //   getNextCommand: () => string;
-// //   setHistoryIndex: (index: number) => void;
-// // }
-
-// // export const TerminalContext = createContext<TerminalContextType | undefined>(undefined);
-
-// // interface TerminalProviderProps {
-// //   children: ReactNode;
-// // }
-
-// // export const TerminalProvider: React.FC<TerminalProviderProps> = ({ children }) => {
-// //   const [history, setHistory] = useState<HistoryItem[]>([]);
-// //   const [commandHistory, setCommandHistory] = useState<string[]>([]);
-// //   const [historyIndex, setHistoryIndex] = useState(-1);
-
-// //   const addToHistory = (item: HistoryItem) => {
-// //     setHistory((prev) => [...prev, item]);
-// //     if (item.type === 'command' && item.content.trim()) {
-// //       setCommandHistory((prev) => [...prev, item.content]);
-// //       setHistoryIndex(-1);
-// //     }
-// //   };
-
-// //   const clearHistory = () => {
-// //     setHistory([]);
-// //     return '';
-// //   };
-
-// //   const getPreviousCommand = () => {
-// //     if (commandHistory.length === 0) return '';
-// //     const newIndex = Math.min(historyIndex + 1, commandHistory.length - 1);
-// //     setHistoryIndex(newIndex);
-// //     return commandHistory[commandHistory.length - 1 - newIndex];
-// //   };
-
-// //   const getNextCommand = () => {
-// //     if (historyIndex <= 0) {
-// //       setHistoryIndex(-1);
-// //       return '';
-// //     }
-// //     const newIndex = historyIndex - 1;
-// //     setHistoryIndex(newIndex);
-// //     return commandHistory[commandHistory.length - 1 - newIndex];
-// //   };
-
-// //   return (
-// //     <TerminalContext.Provider 
-// //       value={{
-// //         history,
-// //         commandHistory,
-// //         historyIndex,
-// //         addToHistory,
-// //         clearHistory,
-// //         getPreviousCommand,
-// //         getNextCommand,
-// //         setHistoryIndex,
-// //       }}
-// //     >
-// //       {children}
-// //     </TerminalContext.Provider>
-// //   );
-// // };
-
-
-// import React, { createContext, useContext, useState, type ReactNode } from 'react';
-// import { HistoryItem } from '../types';
-
-// interface TerminalContextType {
-//   history: HistoryItem[];
-//   commandHistory: string[];
-//   historyIndex: number;
-//   addToHistory: (item: HistoryItem) => void;
-//   clearHistory: () => void;
-//   getPreviousCommand: () => string;
-//   getNextCommand: () => string;
-//   setHistoryIndex: (index: number) => void;
-// }
-
-// export const TerminalContext = createContext<TerminalContextType | undefined>(undefined);
-
-// interface TerminalProviderProps {
-//   children: ReactNode;
-// }
-
-// export const TerminalProvider: React.FC<TerminalProviderProps> = ({ children }) => {
-//   const [history, setHistory] = useState<HistoryItem[]>([]);
-//   const [commandHistory, setCommandHistory] = useState<string[]>([]);
-//   const [historyIndex, setHistoryIndex] = useState(-1);
-
-//   const addToHistory = (item: HistoryItem) => {
-//     setHistory((prev) => [...prev, item]);
-//     if (item.type === 'command' && typeof item.content === 'string' && item.content.trim()) {
-//       setCommandHistory((prev) => [...prev, item.content]);
-//       setHistoryIndex(-1);
-//     }
-//   };
-
-//   const clearHistory = () => {
-//     setHistory([]);
-//     setCommandHistory([]);
-//     return '';
-//   };
-
-//   const getPreviousCommand = () => {
-//     if (commandHistory.length === 0) return '';
-//     const newIndex = Math.min(historyIndex + 1, commandHistory.length - 1);
-//     setHistoryIndex(newIndex);
-//     return commandHistory[commandHistory.length - 1 - newIndex];
-//   };
-
-//   const getNextCommand = () => {
-//     if (historyIndex <= 0) {
-//       setHistoryIndex(-1);
-//       return '';
-//     }
-//     const newIndex = historyIndex - 1;
-//     setHistoryIndex(newIndex);
-//     return commandHistory[commandHistory.length - 1 - newIndex];
-//   };
-
-//   return (
-//     <TerminalContext.Provider 
-//       value={{
-//         history,
-//         commandHistory,
-//         historyIndex,
-//         addToHistory,
-//         clearHistory,
-//         getPreviousCommand,
-//         getNextCommand,
-//         setHistoryIndex,
-//       }}
-//     >
-//       {children}
-//     </TerminalContext.Provider>
-//   );
-// };
-
-
-import React, { createContext, useContext, useState, type ReactNode } from 'react';
-import { HistoryItem } from '../types';
+import React, { createContext, useState, type ReactNode } from "react";
+import { HistoryItem } from "../types";
 
 interface TerminalContextType {
   history: HistoryItem[];
@@ -161,7 +12,9 @@ interface TerminalContextType {
   setHistoryIndex: (index: number) => void;
 }
 
-export const TerminalContext = createContext<TerminalContextType | undefined>(undefined);
+export const TerminalContext = createContext<TerminalContextType | undefined>(
+  undefined
+);
 
 interface TerminalProviderProps {
   children: ReactNode;
@@ -174,7 +27,7 @@ export const TerminalProvider: React.FC<TerminalProviderProps> = ({ children }) 
 
   const addToHistory = (item: HistoryItem) => {
     setHistory((prev) => [...prev, item]);
-    if (item.type === 'command' && typeof item.content === 'string' && item.content.trim()) {
+    if (item.type === "command" && typeof item.content === "string" && item.content.trim()) {
       setCommandHistory((prev) => [...prev, item.content as string]);
       setHistoryIndex(-1);
     }
@@ -186,7 +39,7 @@ export const TerminalProvider: React.FC<TerminalProviderProps> = ({ children }) 
   };
 
   const getPreviousCommand = () => {
-    if (commandHistory.length === 0) return '';
+    if (commandHistory.length === 0) return "";
     const newIndex = Math.min(historyIndex + 1, commandHistory.length - 1);
     setHistoryIndex(newIndex);
     return commandHistory[commandHistory.length - 1 - newIndex];
@@ -195,7 +48,7 @@ export const TerminalProvider: React.FC<TerminalProviderProps> = ({ children }) 
   const getNextCommand = () => {
     if (historyIndex <= 0) {
       setHistoryIndex(-1);
-      return '';
+      return "";
     }
     const newIndex = historyIndex - 1;
     setHistoryIndex(newIndex);
@@ -203,7 +56,7 @@ export const TerminalProvider: React.FC<TerminalProviderProps> = ({ children }) 
   };
 
   return (
-    <TerminalContext.Provider 
+    <TerminalContext.Provider
       value={{
         history,
         commandHistory,

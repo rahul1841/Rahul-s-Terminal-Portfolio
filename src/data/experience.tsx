@@ -1,54 +1,61 @@
-
 export interface Experience {
   id: number;
   title: string;
   company: string;
+  location: string;
   date: string;
-  description: string;
+  bullets: string[];
 }
 
 export const experience: Experience[] = [
   {
     id: 1,
-    title: "SDE Intern",
-    company: "Bombay Shaving Company",
-    date: "April 2024 - June 2024",
-    description:
-      "Led the development of a **Customer Reviews Scraping Platform** using **FastApi** during 3-month internship. Built a scraping solution with **Playwright** to collect data weekly, processing over **5,000 reviews per month** from Amazon, Flipkart, and competitor platforms. Implemented **Airflow** to schedule and manage scraper tasks, reducing manual intervention by **90%** and ensuring consistent data updates. Integrated the **OpenAI API** for sentiment analysis, achieving **80% precision** in categorizing customer sentiment.",
+    title: "Associate Software Development Engineer",
+    company: "Juspay",
+    location: "Bengaluru",
+    date: "May 2025 - Present",
+    bullets: [
+      "Architected & built Xyne Claw, a multi-tenant AI agent platform for Xyne Spaces, enabling async agent orchestration, scheduled workflows, and production agent execution integrated with chat & workspaces.",
+      "Built the execution runtime on the Pi coding-agent SDK with multi-LLM routing, sandboxed execution, subagents, & a secure MCP layer (credential vault + proxied tools) supporting 100+ MCP connectors.",
+      "Engineered an end-to-end attachment processing pipeline in Xyne Spaces, handling uploads, chunking, indexing in Vespa, and efficient retrieval at scale.",
+      "Developed a high-performance, virtualized multi-format document viewing system (10+ formats) with superior preview capabilities over Slack, improving content accessibility and overall user experience.",
+    ],
   },
   {
     id: 2,
-    title: "Open Source Developer",
-    company: "GirlScript Summer of Code",
-    date: "May 2024 - August 2024",
-    description:
-      "Actively contributed to open-source projects, collaborating with global teams. Led project initiatives, showcasing strong leadership.",
-  },
-  {
-    id: 3,
     title: "SDE Intern",
     company: "Bombay Shaving Company",
-    date: "Feb 2025 - Present",
-    description:
-      "Currently contributing to the backend development of the Turbo Insyt application using ASP.NET Core and PostgreSQL as the database.",
+    location: "Gurgaon",
+    date: "July 2024 - September 2024",
+    bullets: [
+      "Built an automated data pipeline to scrape, clean, and process customer review data at scale.",
+      "Developed a scalable system using the MERN stack, integrating BeautifulSoup for data extraction and the Gemini API for sentiment analysis, producing structured insights with exportable reports.",
+    ],
   },
-  // Add more experience entries as needed
 ];
 
 export const renderExperience = (experienceData: Experience[]): JSX.Element => {
-  const formattedExperience = experienceData.map((exp, index) => (
-    `${exp.title} ~ ${exp.company} | ${exp.date}
-- ${exp.description}
-${index !== experienceData.length - 1 ? '\n--------------------------------------------------------------\n' : ''}`
-  )).join('\n');
-
   return (
-    <pre style={{ whiteSpace: 'pre-wrap' }}>
-      <code>
-        <br />
-        {formattedExperience}
-        <br />
-      </code>
-    </pre>
+    <div>
+      <br />
+      {experienceData.map((exp, index) => (
+        <div key={exp.id} className="mb-4">
+          <p>
+            {exp.title} ~ {exp.company} | {exp.location} | {exp.date}
+          </p>
+          <ul>
+            {exp.bullets.map((bullet, i) => (
+              <li key={i}>- {bullet}</li>
+            ))}
+          </ul>
+          {index !== experienceData.length - 1 && (
+            <div className="my-4">
+              --------------------------------------------------------------
+            </div>
+          )}
+        </div>
+      ))}
+      <br />
+    </div>
   );
 };

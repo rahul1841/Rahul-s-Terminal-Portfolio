@@ -1,37 +1,43 @@
-
+import React from "react";
+import type { Command } from "../types";
 import { about, renderAbout } from "../data/about";
 import { experience, renderExperience } from "../data/experience";
-import { certifications, renderCertifications } from "../data/certifcations";
+import { certifications, renderCertifications } from "../data/certifications";
 import { education, renderEducation } from "../data/education";
 import { projects, renderProject } from "../data/projects";
-import { commandsData, renderHelp } from "../data/commands";
+import { renderHelp } from "../data/commands";
 import { renderSkills } from "../data/skills";
+import { renderAchievements } from "../data/achievements";
 import { renderContact } from "../data/contact";
-import Init from "../data/init"; 
 import { openNewWindow } from "../data/openNewWindow";
 import Contributions from "../data/contributions";
-import React from "react";
-import { useTerminal } from '../hooks/useTerminal';
+import { Banner } from "../components/Banner";
+import { profile } from "../data/profile";
 
-export const commands: Record<string, { description: string; execute: () => JSX.Element | string }> = {
-  whoami: { description: "Display personal information", execute: () => renderAbout(about) },
-  myprojects: { description: "List projects", execute: () => renderProject(projects) },
-  work: { description: "Show work experience", execute: () => renderExperience(experience) },
-  certs: { description: "List certifications", execute: () => renderCertifications(certifications) },
-  edu: { description: "Show education details", execute: () => renderEducation(education) },
-  help: { description: "Show available commands", execute: () => renderHelp(commandsData) },
-  // init: { description: "Initialize terminal", execute: () => Init() },
-  init: { description: "Initialize terminal", execute: () => {
-    const { clearHistory } = useTerminal();
-    clearHistory();
-    return Init();
-  }},
-  skills: { description: "Show technical skills", execute: () => renderSkills() },
-  contactme: { description: "Show contact information", execute: () => renderContact() },
-  linkedin: { description: "Open LinkedIn profile", execute: () => openNewWindow("https://www.linkedin.com/in/rahul-kumar-716045207/") },
-  github: { description: "Open GitHub profile", execute: () => openNewWindow("https://github.com/rahul1841") },
-  resume: { description: "Open resume", execute: () => openNewWindow("https://drive.google.com/file/d/11u9ldjSP0WIFXEqw2qgle76tHJr3UvtP/view?usp=sharing") },
-  instagram: { description: "Open Instagram profile", execute: () => openNewWindow("https://www.instagram.com/officialrahulsamyal/") },
-  leetcode: { description: "Open LeetCode profile", execute: () => openNewWindow("https://leetcode.com/u/rahul2004kumar14/") },
-  contributions: { description: "List my recent open source contributions", execute: () => React.createElement(Contributions) },
+// The single command registry. Each entry carries its help text, category,
+// and the function that renders its output. `help` is generated from this
+// object, so there is no separate command list to keep in sync.
+//
+// Note: `clear` and `init` are intercepted in App before execute() is called
+// (they need to clear terminal state); their entries exist here so they show
+// up in help and pass command validation.
+export const commands: Record<string, Command> = {
+  help: { description: "Show available commands", category: "info", execute: () => renderHelp(commands) },
+  whoami: { description: "Display personal information", category: "info", execute: () => renderAbout(about) },
+  myprojects: { description: "List projects", category: "info", execute: () => renderProject(projects) },
+  work: { description: "Show work experience", category: "info", execute: () => renderExperience(experience) },
+  certs: { description: "List certifications", category: "info", execute: () => renderCertifications(certifications) },
+  edu: { description: "Show education details", category: "info", execute: () => renderEducation(education) },
+  skills: { description: "Show technical skills", category: "info", execute: () => renderSkills() },
+  achievements: { description: "List achievements", category: "info", execute: () => renderAchievements() },
+  contributions: { description: "List my recent open source contributions", category: "info", execute: () => React.createElement(Contributions) },
+  contactme: { description: "Show contact information", category: "info", execute: () => renderContact() },
+  resume: { description: "Open resume", category: "links", execute: () => openNewWindow(profile.links.resume) },
+  linkedin: { description: "Open LinkedIn profile", category: "links", execute: () => openNewWindow(profile.links.linkedIn) },
+  github: { description: "Open GitHub profile", category: "links", execute: () => openNewWindow(profile.links.github) },
+  leetcode: { description: "Open LeetCode profile", category: "links", execute: () => openNewWindow(profile.links.leetcode) },
+  codeforces: { description: "Open Codeforces profile", category: "links", execute: () => openNewWindow(profile.links.codeforces) },
+  instagram: { description: "Open Instagram profile", category: "links", execute: () => openNewWindow(profile.links.instagram) },
+  clear: { description: "Clear the terminal", category: "system", execute: () => React.createElement(React.Fragment) },
+  init: { description: "Initialize the terminal", category: "system", execute: () => React.createElement(Banner) },
 };

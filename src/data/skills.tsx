@@ -1,46 +1,44 @@
-import React from 'react';
-
-interface SkillData {
+export interface SkillData {
   title: string;
   skills: string[];
 }
 
-const skillData: SkillData[] = [
+// Single source for the skill list — used by both `skills` and `whoami`.
+export const skillData: SkillData[] = [
+  {
+    title: "AI / GenAI",
+    skills: ["Multi-Agent Systems", "Agent Orchestration", "MCP", "RAG", "Prompt Engineering", "Vespa"],
+  },
   {
     title: "Programming Languages",
-    skills: ["C++", "JavaScript", "Python", "C#"]
+    skills: ["C/C++", "JavaScript", "Python"],
   },
   {
-    title: "Frontend",
-    skills: ["HTML5", "CSS3", "Tailwind CSS", "JavaScript", "React.js", "TypeScript", "Streamlit", "Next.js", "React Hooks"]
+    title: "Libraries/Frameworks",
+    skills: ["React.js", "Node.js", "Express.js", "Tailwind CSS", "TypeScript", "Prisma", "Mongoose", "Next.js", "Redis", "Fastify", "Kafka"],
   },
   {
-    title: "Backend",
-    skills: ["Node.js", "Express.js", "REST APIs", "MongoDB", "PostgreSQL", "FastApi", "LangChain", "Flask", "ASP.NET Core"]
+    title: "Tools / Platforms",
+    skills: ["GitHub", "Docker", "Git", "Postman", "Netlify", "Kubernetes", "AWS"],
   },
   {
-    title: "DevOps",
-    skills: ["Docker", "Kubernetes", "AWS", "Prometheus", "Grafana"]
+    title: "Databases",
+    skills: ["MySQL", "MongoDB", "PostgreSQL"],
   },
-  {
-    title: "Miscellaneous",
-    skills: ["Git", "Github", "Vercel", "Netlify", "Cloudinary"]
-  }
 ];
 
-
 export const renderSkills = (): JSX.Element => {
-    return (
-      <div>
-        <br />
-        <ul>
-          {skillData.map((skill, index) => (
-            <li key={index}>
-              - {skill.title} : {skill.skills.join(', ')}
-            </li>
-          ))}
-        </ul>
-        <br />
-      </div>
-    );
-  };
+  return (
+    <div>
+      <br />
+      <ul>
+        {skillData.map((skill, index) => (
+          <li key={index}>
+            - {skill.title} : {skill.skills.join(", ")}
+          </li>
+        ))}
+      </ul>
+      <br />
+    </div>
+  );
+};
