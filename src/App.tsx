@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { Terminal } from "./components/Terminal";
 import { CommandLine } from "./components/CommandLine";
 import { Banner } from "./components/Banner";
+import { AskAgent } from "./components/AskAgent";
 import { useTerminal } from "./hooks/useTerminal";
 import { TerminalProvider } from "./components/TerminalProvider";
 import { commands } from "./utils/commands";
@@ -19,21 +20,37 @@ function AppContent() {
   const handleCommand = (command: string) => {
     addToHistory({ type: "command", content: command });
 
-    const trimmedCommand = command.trim().toLowerCase();
-    const firstWord = trimmedCommand.split(" ")[0];
+    const trimmed = command.trim();
+    const firstWord = trimmed.split(/\s+/)[0].toLowerCase();
+    const args = trimmed.slice(firstWord.length).trim();
 
     // clear/init reset terminal state, so they're handled here rather than
     // through the registry's execute() (which can't touch React state).
-    if (trimmedCommand === "clear" || trimmedCommand === "init") {
+    if (firstWord === "clear" || firstWord === "init") {
       clearHistory();
       setInputValue("");
-      if (trimmedCommand === "init") {
+      if (firstWord === "init") {
         addToHistory({ type: "response", content: <Banner /> });
       }
       return;
     }
 
-    const commandFound = commands[trimmedCommand];
+    // ask -> the AI agent (async, so it's rendered as a component that fetches
+    // /api/ask rather than a synchronous execute()).
+    if (firstWord === "ask") {
+      if (!args) {
+        addToHistory({
+          type: "error",
+          content: "usage: ask <question>   e.g. ask what's Rahul's AI experience?",
+        });
+      } else {
+        addToHistory({ type: "response", content: <AskAgent question={args} /> });
+      }
+      setInputValue("");
+      return;
+    }
+
+    const commandFound = commands[firstWord];
 
     if (commandFound) {
       addToHistory({ type: "response", content: commandFound.execute() });
@@ -44,10 +61,10 @@ function AppContent() {
           `shell : command not found : ${firstWord}. Try 'help' to get started` +
           `\n\nThis is not a real terminal and doesn't support Linux commands like 'cd', 'ls', or 'cat' as of now. It's designed for an interactive experience. If you have suggestions or just want to give any feedback, ping me on my socials. Just simply type 'contactme'.\n`,
       });
-    } else if (trimmedCommand) {
+    } else if (trimmed) {
       addToHistory({
         type: "error",
-        content: `shell : command not found : ${trimmedCommand}. Try 'help' to get started\n`,
+        content: `shell : command not found : ${trimmed}. Try 'help' to get started\n`,
       });
     }
 

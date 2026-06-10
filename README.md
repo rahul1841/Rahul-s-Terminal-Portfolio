@@ -9,6 +9,7 @@ projects, experience, skills, and contact links.
 | Command | Description |
 |---------|-------------|
 | `help` | Show all available commands |
+| `ask <question>` | Ask the AI agent about Rahul (answers + suggests commands) |
 | `whoami` | Personal information |
 | `myprojects` | List projects |
 | `work` | Work experience |
@@ -34,15 +35,44 @@ npm run preview  # preview the production build
 npm run lint     # lint the codebase
 ```
 
+## AI Agent (`ask` command)
+
+The `ask` command is powered by Google Gemini through a Vercel serverless
+function (`api/ask.ts`) so the API key never reaches the browser. The agent
+answers from the portfolio context and suggests the relevant command for full
+details.
+
+**Setup**
+
+1. Get a free key from [Google AI Studio](https://aistudio.google.com/app/apikey).
+2. Add it to Vercel: **Project Settings → Environment Variables → `GEMINI_API_KEY`**.
+3. Deploy. The agent is live at `/api/ask`.
+
+**Local testing of the agent** — plain `npm run dev` (Vite) does not serve
+`/api`, so the agent will show a friendly "unavailable" message locally. To test
+it end-to-end:
+
+```bash
+npm i -g vercel        # once
+# put GEMINI_API_KEY in a local .env (see .env.example)
+vercel dev             # serves the app AND /api together
+```
+
+> When you change `src/data/*`, also update `PORTFOLIO_CONTEXT` in `api/ask.ts`
+> so the agent's knowledge stays in sync.
+
 ## Project Structure
 
 ```
+api/
+  ask.ts                  # Vercel serverless function for the AI agent (Gemini)
 src/
   components/
     Terminal.tsx          # scrollback / command echo
     CommandLine.tsx       # input line + key handling
     TerminalProvider.tsx  # React context: history + command history
     Banner.tsx            # welcome banner
+    AskAgent.tsx          # renders the `ask` agent's answer
     ui/
       ExternalLink.tsx    # reusable external anchor
       Prompt.tsx          # the user@portfolio:~$ prompt

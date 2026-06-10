@@ -23,6 +23,7 @@ import { profile } from "../data/profile";
 // up in help and pass command validation.
 export const commands: Record<string, Command> = {
   help: { description: "Show available commands", category: "info", execute: () => renderHelp(commands) },
+  ask: { description: "Ask the AI agent about Rahul (e.g. ask what is his AI experience)", category: "info", execute: () => React.createElement(React.Fragment) },
   whoami: { description: "Display personal information", category: "info", execute: () => renderAbout(about) },
   myprojects: { description: "List projects", category: "info", execute: () => renderProject(projects) },
   work: { description: "Show work experience", category: "info", execute: () => renderExperience(experience) },

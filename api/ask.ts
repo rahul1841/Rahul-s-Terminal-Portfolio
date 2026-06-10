@@ -1,0 +1,136 @@
+// Vercel serverless function: /api/ask
+//
+// Holds the Gemini API key server-side (never exposed to the browser) and
+// answers visitor questions about Rahul using the portfolio context below.
+//
+// Setup:
+//   1. In Vercel project settings, add env var GEMINI_API_KEY.
+//   2. For local testing run `vercel dev` (plain `vite` won't serve /api).
+//
+// NOTE: keep PORTFOLIO_CONTEXT in sync when you update src/data/*.
+
+const MODEL = "gemini-2.0-flash";
+
+const PORTFOLIO_CONTEXT = `
+PERSON: Rahul Kumar — Software Engineer | AI Systems. Based in Bengaluru, India.
+Contact: rahul2004kumar14@gmail.com, +91-6005435690.
+
+EXPERIENCE:
+- Juspay — Associate Software Development Engineer (Bengaluru, May 2025 - Present):
+  Architected & built Xyne Claw, a multi-tenant AI agent platform for Xyne Spaces
+  (async agent orchestration, scheduled workflows, production agent execution
+  integrated with chat & workspaces). Built the execution runtime on the Pi
+  coding-agent SDK with multi-LLM routing, sandboxed execution, subagents, and a
+  secure MCP layer (credential vault + proxied tools) supporting 100+ MCP
+  connectors. Engineered an end-to-end attachment processing pipeline (uploads,
+  chunking, Vespa indexing, retrieval at scale). Built a virtualized multi-format
+  document viewer (10+ formats) with better preview than Slack.
+- Bombay Shaving Company — SDE Intern (Gurgaon, Jul 2024 - Sep 2024):
+  Built an automated pipeline to scrape, clean, and process customer reviews at
+  scale. Used the MERN stack with BeautifulSoup for extraction and the Gemini API
+  for sentiment analysis, producing structured insights with exportable reports.
+
+EDUCATION:
+- GL Bajaj Institute of Technology and Management, Greater Noida — B.Tech,
+  Information Technology (2021 - 2025), CGPA 8.0.
+- Kendriya Vidyalaya Hiranagar — schooling (10th: 86.4%, 12th: 86.2%).
+
+SKILLS:
+- AI / GenAI: Multi-Agent Systems, Agent Orchestration, MCP, RAG, Prompt
+  Engineering, Vespa.
+- Languages: C/C++, JavaScript, Python.
+- Libraries/Frameworks: React.js, Node.js, Express.js, Tailwind CSS, TypeScript,
+  Prisma, Mongoose, Next.js, Redis, Fastify, Kafka.
+- Tools/Platforms: GitHub, Docker, Git, Postman, Netlify, Kubernetes, AWS.
+- Databases: MySQL, MongoDB, PostgreSQL.
+
+PROJECTS:
+- EduGlow (MERN): ed-tech platform to create, consume, and rate courses; instructors
+  can sell courses and track sales. Live: https://edu-glow.vercel.app/
+- QuikShare (Next.js, ShadCN, MongoDB, Redis): link & code sharing with Redis
+  caching, API rate limiting, and CI/CD via Cloud Build/Cloud Run.
+  Live: https://share.taskynow.in/
+- VaultX (React.js, Tailwind, Solana, Web3, BIP39): blockchain web wallet creating
+  Solana/Ethereum wallets from a mnemonic. Live: https://vault-x-brown.vercel.app/
+- Quizify (React.js, Tailwind, Google Gemini API): dynamic quiz generator.
+- PdfAi (Python, Streamlit, LangChain, OpenAI): GenAI chatbot for PDF analysis.
+- Basic-Port-Scanner (Python, Shodan InternetDB API): custom port scanner.
+
+ACHIEVEMENTS:
+- 1850+ rating on LeetCode, 1470+ on Codeforces.
+- Solved 800+ DSA problems across platforms.
+- Ranked 249/30,708 (LeetCode Weekly 470) and 434/37,342 (Biweekly 178).
+- 1st place, Neuro Nest Hackathon (GL Bajaj).
+
+CERTIFICATIONS: Cybersecurity Skilling Program (IIT Kanpur); Neuro Nest Hackathon winner.
+`;
+
+const COMMANDS =
+  "whoami, work, myprojects, skills, achievements, edu, certs, contributions, contactme, resume, linkedin, github, leetcode, codeforces, instagram";
+
+const SYSTEM = `You are the portfolio assistant for Rahul Kumar's interactive terminal portfolio.
+Answer the visitor's question in 2-4 short, friendly sentences using ONLY the context below — never invent facts.
+After answering, if a terminal command would show fuller details, suggest it in backticks, e.g. "Run \`work\` for the full experience."
+Available commands: ${COMMANDS}.
+If the question is unrelated to Rahul or this portfolio, politely say you can only answer about Rahul and suggest \`help\`.
+Keep the tone concise and terminal-appropriate. Do not use markdown headings.
+
+CONTEXT:${PORTFOLIO_CONTEXT}`;
+
+interface RequestLike {
+  method?: string;
+  body?: { question?: unknown };
+}
+
+interface ResponseLike {
+  status: (code: number) => ResponseLike;
+  json: (data: unknown) => void;
+}
+
+export default async function handler(req: RequestLike, res: ResponseLike) {
+  if (req.method !== "POST") {
+    res.status(405).json({ error: "Method not allowed" });
+    return;
+  }
+
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    res.status(500).json({ error: "Server is missing GEMINI_API_KEY." });
+    return;
+  }
+
+  const question = String(req.body?.question ?? "").trim().slice(0, 500);
+  if (!question) {
+    res.status(400).json({ error: "Missing question." });
+    return;
+  }
+
+  try {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${apiKey}`;
+    const geminiRes = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        systemInstruction: { parts: [{ text: SYSTEM }] },
+        contents: [{ role: "user", parts: [{ text: question }] }],
+        generationConfig: { temperature: 0.4, maxOutputTokens: 500 },
+      }),
+    });
+
+    if (!geminiRes.ok) {
+      res.status(502).json({ error: "The AI service is unavailable right now." });
+      return;
+    }
+
+    const data = await geminiRes.json();
+    const answer =
+      data?.candidates?.[0]?.content?.parts
+        ?.map((p: { text?: string }) => p.text ?? "")
+        .join("")
+        .trim() || "Sorry, I couldn't generate a response. Try `help` for commands.";
+
+    res.status(200).json({ answer });
+  } catch {
+    res.status(500).json({ error: "Something went wrong reaching the AI service." });
+  }
+}

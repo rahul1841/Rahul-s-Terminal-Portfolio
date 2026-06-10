@@ -27,6 +27,11 @@ export const renderHelp = (
         <ul>
           <pre>   - Type 'help' to display this help section.</pre>
         </ul>
+        <br />
+        <li>4. AI Agent:</li>
+        <ul>
+          <pre>   - Type 'ask &lt;question&gt;' to ask the AI agent about Rahul, e.g. ask what is his AI experience.</pre>
+        </ul>
       </ul>
       <br />
       <br />
