@@ -7,7 +7,13 @@
 
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 
-const MODEL = "gemini-2.0-flash-lite"; // higher free-tier limits than 2.0-flash
+// Model is overridable via the GEMINI_MODEL env var (no code change needed).
+// Free-tier quota (per the Google AI Studio rate-limit page) — pick by need:
+//   gemini-2.5-flash-lite  -> 10 RPM,  20 requests/day   (default, low traffic)
+//   gemini-2.5-flash       ->  5 RPM,  20 requests/day
+//   gemini-3.1-flash-lite  -> 15 RPM, 500 requests/day   (best for a public site)
+// NOTE: the 2.0-* models have NO free quota (0/0) and will always return 429.
+const MODEL = process.env.GEMINI_MODEL || "gemini-2.5-flash-lite";
 
 const PORTFOLIO_CONTEXT = `
 PERSON: Rahul Kumar — Software Engineer | AI Systems. Based in Bengaluru, India.
