@@ -14,6 +14,7 @@ function AppContent() {
   const inputRef = useRef<HTMLInputElement>(null);
   const { history, addToHistory, clearHistory } = useTerminal();
   const [inputValue, setInputValue] = useState("");
+  const [bannerKey, setBannerKey] = useState(0);
   const ip = useIpAddress();
   const user = ip || USERNAME;
 
@@ -30,7 +31,7 @@ function AppContent() {
       clearHistory();
       setInputValue("");
       if (firstWord === "init") {
-        addToHistory({ type: "response", content: <Banner /> });
+        setBannerKey((k) => k + 1);
       }
       return;
     }
@@ -89,7 +90,7 @@ function AppContent() {
     >
       <div ref={terminalRef} className="h-full w-full overflow-auto scroll-smooth">
         <div className="mb-4">
-          <Banner />
+          <Banner key={bannerKey} />
         </div>
         <Terminal history={history} user={user} />
         <CommandLine
